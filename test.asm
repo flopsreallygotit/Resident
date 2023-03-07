@@ -29,47 +29,6 @@
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~;
 
 .model tiny
-.286
-
-locals @@
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.data
-
-;~~~Config~~~
-button = 1ah
-
-;~~~Video Output~~~
-video = 0b800h       ; Address of video segment start.
-cmd   = 0081h        ; Address of cmd   segment start.
-shift = 1980         ; Display shift.
-
-;~~~Frame Output~~~
-x1 = 0
-y1 = 0
-
-x2 = 10
-y2 = 5
-
-x3 = x1 + 1
-y3 = y1 + 1
-
-color = 3eh
-
-;~~~Constants~~~
-int_09     = 4h * 9h   ; Shift of 9 interrupt in Interruption Table.
-int_08     = 4h * 8h   ; Shift of 8 interrupt in Interruption Table.
-buffer     = 0b925h    ; Address of buffer.
-buf_size   = 80d * 25d ; Size of buffer. (Number of symbols on display)
-reg_number = 4d        ; Number of registers in print.
-
-;~~~Frame switch flag~~~
-flag db 0 ; Frame is on display if flag != 0, else frame is not on display.
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-include macro.asm
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -77,32 +36,18 @@ include macro.asm
 
 org 100h
 
-Start:      xor bx, bx
-            mov es, bx
+Start:      mov ax, 1111h
+            mov bx, 2222h
+            
+            mov dx, 1000h
 
-            mov bx, int_09
-            mov di, offset old_int_09
-            mov si, offset New_int_09
-            call PlaceInterrupt
+Next:       mov cx, -1
+Delay:      loop Delay
+            dec dx
+            cmp dx, 0
+            jne Next
 
-            mov bx, int_08
-            mov di, offset old_int_08
-            mov si, offset New_int_08
-            call PlaceInterrupt
+            mov ax, 4c00h
+            int 21h            
 
-            STAYRESIDENT
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-include string.asm
-include funcs.asm
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.data
-
-style db '**** ****'
-names db 'AX = ', 0, 'BX = ', 0, 'CX = ', 0, 'DX = ', 0
-
-EOP:
 end Start

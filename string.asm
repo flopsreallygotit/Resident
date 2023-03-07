@@ -4,6 +4,33 @@
 ; Bad_string_example:   db "I don't read warnings xD"
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Prints 0-terminated string.
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Entry:    SI = Address of string, DI = Display shift
+; Exit:     SI = Address of string zero symbol, DI = New display shift
+; Expects:  ES = Address of video segment start
+; Destroys: None
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PrintStr        proc
+                nop
+                push ax
+
+                mov ah, color
+
+@@Next:         lodsb
+                cmp al, 0
+                je @@End
+
+                stosw
+
+                jmp @@Next
+
+@@End:          pop ax
+                nop
+                endp
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ; Counts length of string
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ; Entry:    SI = Address of string
@@ -123,3 +150,36 @@ Strncmp     proc
 
             ret
             endp
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Converts number with 16 radix in string
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Entry:    BX = Number
+;           DI = Address to put string
+; Exit:     DI = Address after string is placed
+; Expects:  None
+; Destroys: None
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Itoa16      proc
+            push ax bx cx si
+
+            mov cx, 4
+
+@@Next:     mov si, offset hex_string
+            mov ax, bx
+            shr ax, 12d
+            add si, ax
+            mov ax, [si]
+            mov ah, color
+            stosw
+            shl bx, 4d
+
+            loop @@Next
+
+            pop si cx bx ax
+
+            ret
+            endp
+
+hex_string db '0123456789ABCDEF'
